@@ -11,7 +11,7 @@ body {
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* Fix text being pushed to the right */
@@ -67,10 +67,10 @@ h3 { font-size: 1rem !important; }
 .border-2.border-indigo-200 li,
 .bg-indigo-50 li,
 div[class*="border-indigo"] li {
-  font-size: 0.85rem !important;
-  font-weight: 600 !important;
-  line-height: 1.4 !important;
-  padding: 1px 0 !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  padding: 0 !important;
 }
 
 /* Team roster lists - tighter spacing */
@@ -87,14 +87,14 @@ ul.space-y-1 > * + * {
 /* Team letter headers inside cards */
 .border-2.border-indigo-200 h3,
 .bg-indigo-50 h3 {
-  font-size: 0.95rem !important;
-  margin-bottom: 0.4rem !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 0.25rem !important;
 }
 
 /* Team cards themselves - tighter */
 .border-2.border-indigo-200,
 .bg-indigo-50.border-2 {
-  padding: 0.6rem 0.75rem !important;
+  padding: 0.4rem 0.6rem !important;
 }
 
 /* ==================== TEAM GENERATION RESPONSIVE ==================== */
