@@ -854,19 +854,29 @@ const AdminDashboard = ({ appState, onUpdate }) => {
     try {
       const csvContent = buildCsvContent();
       
-      const res = await fetch('/api/send-scorecard', {
+      const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer re_5sUWpg3T_Q8pSUuHB98JeWD3xZvycd2ha'
+        },
         body: JSON.stringify({
+          from: 'Weekly Scorer <onboarding@resend.dev>',
           to: savedEmails,
-          weekNumber: weekCounter,
-          csvContent,
+          subject: `Week ${weekCounter} Scorecard`,
+          text: `Hi everyone,\n\nAttached is the scorecard for Week ${weekCounter}.\n\nRegards,\nWeekly Team Scorer`,
+          attachments: [
+            {
+              filename: `Week_${weekCounter}_Scorecard.csv`,
+              content: btoa(csvContent),
+            },
+          ],
         }),
       });
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (res.ok) {
         setEmailSuccess(`Scorecard emailed to ${savedEmails.length} recipient(s)!`);
         setTimeout(() => {
           setShowEmailModal(false);
@@ -875,10 +885,10 @@ const AdminDashboard = ({ appState, onUpdate }) => {
           setTimeout(() => setSuccess(''), 4000);
         }, 2000);
       } else {
-        setEmailError(data.error || 'Failed to send email. Check your server is running.');
+        setEmailError(data.message || data.error || 'Failed to send email');
       }
     } catch (err) {
-      setEmailError('Could not connect to email server. Check your Vercel environment variables.');
+      setEmailError('Failed to send email. Please try again.');
     } finally {
       setEmailSending(false);
     }
