@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: 'Weekly Scorer <onboarding@resend.dev>',
+        from: 'Weekly Scorer <scorecards@finessecards.com>',
         to,
         subject,
         text,
