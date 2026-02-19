@@ -854,7 +854,7 @@ const AdminDashboard = ({ appState, onUpdate }) => {
     try {
       const csvContent = buildCsvContent();
       
-      const res = await fetch('http://localhost:3001/api/send-scorecard', {
+      const res = await fetch('/api/send-scorecard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -878,7 +878,7 @@ const AdminDashboard = ({ appState, onUpdate }) => {
         setEmailError(data.error || 'Failed to send email. Check your server is running.');
       }
     } catch (err) {
-      setEmailError('Could not connect to email server. Make sure the server is running on port 3001.');
+      setEmailError('Could not connect to email server. Check your Vercel environment variables.');
     } finally {
       setEmailSending(false);
     }
