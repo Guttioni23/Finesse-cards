@@ -1,0 +1,331 @@
+/* ==================== RESPONSIVE FLEXBOX CSS ==================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fix text being pushed to the right */
+.min-h-screen,
+main,
+div,
+section {
+  text-align: left !important;
+}
+
+/* Better container spacing */
+main {
+  max-width: 100% !important;
+  padding: 1.5rem !important;
+}
+
+/* ==================== TEAM GENERATION RESPONSIVE ==================== */
+
+/* Desktop: Teams side by side (2-4 per row) */
+.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1.5rem !important;
+}
+
+/* Each team box */
+.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 > div {
+  flex: 1 1 calc(25% - 1.5rem) !important; /* 4 per row on large screens */
+  min-width: 250px !important;
+}
+
+/* ==================== PLAYER CARDS RESPONSIVE ==================== */
+
+/* Desktop: 3 per row, Mobile: 1 per row */
+.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+
+.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 > div {
+  flex: 1 1 calc(33.333% - 1rem) !important; /* 3 per row */
+  min-width: 280px !important;
+}
+
+/* ==================== STATS CARDS RESPONSIVE ==================== */
+
+/* Desktop: 4 per row, Mobile: 2 per row */
+.grid.grid-cols-1.md\:grid-cols-4 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+
+.grid.grid-cols-1.md\:grid-cols-4 > div {
+  flex: 1 1 calc(25% - 1rem) !important; /* 4 per row */
+  min-width: 200px !important;
+}
+
+/* ==================== BUTTONS RESPONSIVE ==================== */
+
+/* Button containers */
+.flex.flex-wrap.gap-4,
+.flex.gap-2,
+.flex.gap-4 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+  align-items: center !important;
+}
+
+/* Buttons stay inline on desktop, wrap on mobile */
+.flex.flex-wrap.gap-4 button {
+  flex: 0 1 auto !important;
+}
+
+/* ==================== NAVIGATION RESPONSIVE ==================== */
+
+nav .flex.justify-between {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+nav .flex.gap-2 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+}
+
+/* ==================== TABLES RESPONSIVE ==================== */
+
+/* Tables scroll horizontally on small screens */
+.overflow-x-auto {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+table {
+  width: 100% !important;
+  min-width: 600px !important;
+}
+
+/* ==================== BONUS POINTS GRID RESPONSIVE ==================== */
+
+/* Bonus points reference cards */
+.grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+  justify-content: center !important;
+}
+
+.grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 > div {
+  flex: 1 1 calc(14.28% - 1rem) !important; /* 7 per row on large */
+  min-width: 100px !important;
+}
+
+/* ==================== FIXTURES RESPONSIVE ==================== */
+
+/* Fixtures layout */
+.grid.grid-cols-1.lg\:grid-cols-2 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1.5rem !important;
+}
+
+.grid.grid-cols-1.lg\:grid-cols-2 > div {
+  flex: 1 1 calc(50% - 1rem) !important; /* 2 columns on desktop */
+  min-width: 350px !important;
+}
+
+/* ==================== MOBILE BREAKPOINTS ==================== */
+
+/* Tablets and smaller (< 1024px) */
+@media (max-width: 1024px) {
+  main {
+    padding: 1rem !important;
+  }
+
+  /* Teams: 2 per row */
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 > div {
+    flex: 1 1 calc(50% - 1rem) !important;
+  }
+
+  /* Player cards: 2 per row */
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 > div {
+    flex: 1 1 calc(50% - 1rem) !important;
+  }
+
+  /* Stats: 2 per row */
+  .grid.grid-cols-1.md\:grid-cols-4 > div {
+    flex: 1 1 calc(50% - 1rem) !important;
+  }
+
+  /* Bonus points: 4 per row */
+  .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 > div {
+    flex: 1 1 calc(25% - 1rem) !important;
+  }
+}
+
+/* Mobile phones (< 768px) */
+@media (max-width: 768px) {
+  main {
+    padding: 0.75rem !important;
+  }
+
+  /* ALL CARDS STACK VERTICALLY ON MOBILE */
+  
+  /* Teams: 1 per row (stacked) */
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 > div {
+    flex: 1 1 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* Player cards: 1 per row (stacked) */
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 > div {
+    flex: 1 1 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* Stats: 1 per row (stacked) */
+  .grid.grid-cols-1.md\:grid-cols-4 > div {
+    flex: 1 1 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* Bonus points: 2 per row */
+  .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 > div {
+    flex: 1 1 calc(50% - 0.5rem) !important;
+    min-width: 120px !important;
+  }
+
+  /* Fixtures: 1 column (stacked) */
+  .grid.grid-cols-1.lg\:grid-cols-2 > div {
+    flex: 1 1 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* Buttons stack vertically */
+  .flex.flex-wrap.gap-4 {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .flex.flex-wrap.gap-4 button {
+    width: 100% !important;
+  }
+
+  /* Navigation wraps nicely */
+  nav .flex.justify-between {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  nav h1 {
+    font-size: 1.5rem !important;
+  }
+
+  /* Smaller text on mobile */
+  h2 {
+    font-size: 1.25rem !important;
+  }
+
+  h3 {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* Very small phones (< 480px) */
+@media (max-width: 480px) {
+  main {
+    padding: 0.5rem !important;
+  }
+
+  /* Bonus points: 1 per row on tiny screens */
+  .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 > div {
+    flex: 1 1 100% !important;
+  }
+
+  nav h1 {
+    font-size: 1.25rem !important;
+  }
+
+  button {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 1rem !important;
+  }
+}
+
+/* ==================== CENTERING & ALIGNMENT FIXES ==================== */
+
+/* Ensure content is centered but text is left-aligned */
+.max-w-7xl {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: left !important;
+}
+
+/* Fix any right-pushing issues */
+.bg-white.rounded-xl,
+.border-2,
+div[class*="col-span"] {
+  text-align: left !important;
+  margin-left: 0 !important;
+}
+
+/* Cards should have proper alignment */
+.p-6, .p-4, .p-3 {
+  display: block !important;
+  text-align: left !important;
+}
+
+/* ==================== BETTER SPACING ==================== */
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem !important;
+}
+
+.gap-3 {
+  gap: 0.75rem !important;
+}
+
+.gap-4 {
+  gap: 1rem !important;
+}
+
+.gap-6 {
+  gap: 1.5rem !important;
+}
+
+/* ==================== SMOOTH SCROLLING ==================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
