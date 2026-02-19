@@ -854,14 +854,12 @@ const AdminDashboard = ({ appState, onUpdate }) => {
     try {
       const csvContent = buildCsvContent();
       
-      const res = await fetch('https://api.resend.com/emails', {
+      const res = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer re_5sUWpg3T_Q8pSUuHB98JeWD3xZvycd2ha'
         },
         body: JSON.stringify({
-          from: 'Weekly Scorer <onboarding@resend.dev>',
           to: savedEmails,
           subject: `Week ${weekCounter} Scorecard`,
           text: `Hi everyone,\n\nAttached is the scorecard for Week ${weekCounter}.\n\nRegards,\nWeekly Team Scorer`,
