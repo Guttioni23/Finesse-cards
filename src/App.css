@@ -11,6 +11,7 @@ body {
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
 }
 
 /* Fix text being pushed to the right */
@@ -21,68 +22,136 @@ section {
   text-align: left !important;
 }
 
-/* Better container spacing */
+/* Better container spacing - condensed */
 main {
   max-width: 100% !important;
+  padding: 1rem !important;
+}
+
+/* ==================== GLOBAL CONDENSING ==================== */
+
+/* Tighter padding on all cards/panels */
+.p-6 {
+  padding: 1rem !important;
+}
+
+.p-4 {
+  padding: 0.75rem !important;
+}
+
+.p-3 {
+  padding: 0.5rem !important;
+}
+
+.p-8 {
   padding: 1.5rem !important;
+}
+
+/* Smaller headings globally */
+h1 { font-size: 1.5rem !important; }
+h2 { font-size: 1.25rem !important; }
+h3 { font-size: 1rem !important; }
+
+/* Tighter margins between sections */
+.space-y-6 > * + * {
+  margin-top: 1rem !important;
+}
+
+.mb-4 { margin-bottom: 0.5rem !important; }
+.mb-6 { margin-bottom: 0.75rem !important; }
+.mb-8 { margin-bottom: 1rem !important; }
+
+/* ==================== TEAM PLAYER NAMES - SMALLER ==================== */
+
+/* Player names inside team cards */
+.border-2.border-indigo-200 li,
+.bg-indigo-50 li,
+div[class*="border-indigo"] li {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  padding: 1px 0 !important;
+}
+
+/* Team roster lists - tighter spacing */
+.border-2.border-indigo-200 ul,
+.bg-indigo-50 ul {
+  gap: 0 !important;
+}
+
+.border-2.border-indigo-200 ul .space-y-1 > * + *,
+ul.space-y-1 > * + * {
+  margin-top: 2px !important;
+}
+
+/* Team letter headers inside cards */
+.border-2.border-indigo-200 h3,
+.bg-indigo-50 h3 {
+  font-size: 0.95rem !important;
+  margin-bottom: 0.4rem !important;
+}
+
+/* Team cards themselves - tighter */
+.border-2.border-indigo-200,
+.bg-indigo-50.border-2 {
+  padding: 0.6rem 0.75rem !important;
 }
 
 /* ==================== TEAM GENERATION RESPONSIVE ==================== */
 
-/* Desktop: Teams side by side (2-4 per row) */
 .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 1.5rem !important;
+  gap: 0.75rem !important;
 }
 
-/* Each team box */
 .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 > div {
-  flex: 1 1 calc(25% - 1.5rem) !important; /* 4 per row on large screens */
-  min-width: 250px !important;
+  flex: 1 1 calc(25% - 0.75rem) !important;
+  min-width: 200px !important;
 }
 
 /* ==================== PLAYER CARDS RESPONSIVE ==================== */
 
-/* Desktop: 3 per row, Mobile: 1 per row */
 .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 1rem !important;
+  gap: 0.75rem !important;
 }
 
 .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 > div {
-  flex: 1 1 calc(33.333% - 1rem) !important; /* 3 per row */
-  min-width: 280px !important;
+  flex: 1 1 calc(33.333% - 0.75rem) !important;
+  min-width: 250px !important;
 }
 
 /* ==================== STATS CARDS RESPONSIVE ==================== */
 
-/* Desktop: 4 per row, Mobile: 2 per row */
 .grid.grid-cols-1.md\:grid-cols-4 {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 1rem !important;
+  gap: 0.75rem !important;
 }
 
 .grid.grid-cols-1.md\:grid-cols-4 > div {
-  flex: 1 1 calc(25% - 1rem) !important; /* 4 per row */
-  min-width: 200px !important;
+  flex: 1 1 calc(25% - 0.75rem) !important;
+  min-width: 180px !important;
 }
 
-/* ==================== BUTTONS RESPONSIVE ==================== */
+/* ==================== BUTTONS - CONDENSED ==================== */
 
-/* Button containers */
+button {
+  font-size: 0.85rem !important;
+  padding: 0.4rem 0.9rem !important;
+}
+
 .flex.flex-wrap.gap-4,
 .flex.gap-2,
 .flex.gap-4 {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 1rem !important;
+  gap: 0.75rem !important;
   align-items: center !important;
 }
 
-/* Buttons stay inline on desktop, wrap on mobile */
 .flex.flex-wrap.gap-4 button {
   flex: 0 1 auto !important;
 }
@@ -92,7 +161,7 @@ main {
 nav .flex.justify-between {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 1rem !important;
+  gap: 0.75rem !important;
   align-items: center !important;
   justify-content: space-between !important;
 }
@@ -103,9 +172,8 @@ nav .flex.gap-2 {
   gap: 0.5rem !important;
 }
 
-/* ==================== TABLES RESPONSIVE ==================== */
+/* ==================== TABLES - CONDENSED ==================== */
 
-/* Tables scroll horizontally on small screens */
 .overflow-x-auto {
   overflow-x: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -116,103 +184,93 @@ table {
   min-width: 600px !important;
 }
 
-/* ==================== BONUS POINTS GRID RESPONSIVE ==================== */
+table th,
+table td {
+  padding: 0.35rem 0.5rem !important;
+  font-size: 0.8rem !important;
+}
 
-/* Bonus points reference cards */
+/* ==================== BONUS POINTS GRID ==================== */
+
 .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 1rem !important;
+  gap: 0.5rem !important;
   justify-content: center !important;
 }
 
 .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 > div {
-  flex: 1 1 calc(14.28% - 1rem) !important; /* 7 per row on large */
-  min-width: 100px !important;
+  flex: 1 1 calc(14.28% - 0.5rem) !important;
+  min-width: 90px !important;
 }
 
 /* ==================== FIXTURES RESPONSIVE ==================== */
 
-/* Fixtures layout */
 .grid.grid-cols-1.lg\:grid-cols-2 {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 1.5rem !important;
+  gap: 1rem !important;
 }
 
 .grid.grid-cols-1.lg\:grid-cols-2 > div {
-  flex: 1 1 calc(50% - 1rem) !important; /* 2 columns on desktop */
-  min-width: 350px !important;
+  flex: 1 1 calc(50% - 0.75rem) !important;
+  min-width: 320px !important;
 }
 
 /* ==================== MOBILE BREAKPOINTS ==================== */
 
-/* Tablets and smaller (< 1024px) */
 @media (max-width: 1024px) {
-  main {
-    padding: 1rem !important;
-  }
-
-  /* Teams: 2 per row */
-  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 > div {
-    flex: 1 1 calc(50% - 1rem) !important;
-  }
-
-  /* Player cards: 2 per row */
-  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 > div {
-    flex: 1 1 calc(50% - 1rem) !important;
-  }
-
-  /* Stats: 2 per row */
-  .grid.grid-cols-1.md\:grid-cols-4 > div {
-    flex: 1 1 calc(50% - 1rem) !important;
-  }
-
-  /* Bonus points: 4 per row */
-  .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 > div {
-    flex: 1 1 calc(25% - 1rem) !important;
-  }
-}
-
-/* Mobile phones (< 768px) */
-@media (max-width: 768px) {
   main {
     padding: 0.75rem !important;
   }
 
-  /* ALL CARDS STACK VERTICALLY ON MOBILE */
-  
-  /* Teams: 1 per row (stacked) */
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 > div {
+    flex: 1 1 calc(50% - 0.5rem) !important;
+  }
+
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 > div {
+    flex: 1 1 calc(50% - 0.5rem) !important;
+  }
+
+  .grid.grid-cols-1.md\:grid-cols-4 > div {
+    flex: 1 1 calc(50% - 0.5rem) !important;
+  }
+
+  .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 > div {
+    flex: 1 1 calc(25% - 0.5rem) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    padding: 0.5rem !important;
+  }
+
   .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 > div {
     flex: 1 1 100% !important;
     min-width: 100% !important;
   }
 
-  /* Player cards: 1 per row (stacked) */
   .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 > div {
     flex: 1 1 100% !important;
     min-width: 100% !important;
   }
 
-  /* Stats: 1 per row (stacked) */
   .grid.grid-cols-1.md\:grid-cols-4 > div {
     flex: 1 1 100% !important;
     min-width: 100% !important;
   }
 
-  /* Bonus points: 2 per row */
   .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 > div {
     flex: 1 1 calc(50% - 0.5rem) !important;
-    min-width: 120px !important;
+    min-width: 100px !important;
   }
 
-  /* Fixtures: 1 column (stacked) */
   .grid.grid-cols-1.lg\:grid-cols-2 > div {
     flex: 1 1 100% !important;
     min-width: 100% !important;
   }
 
-  /* Buttons stack vertically */
   .flex.flex-wrap.gap-4 {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -222,57 +280,43 @@ table {
     width: 100% !important;
   }
 
-  /* Navigation wraps nicely */
   nav .flex.justify-between {
     flex-direction: column !important;
     align-items: flex-start !important;
   }
 
   nav h1 {
-    font-size: 1.5rem !important;
-  }
-
-  /* Smaller text on mobile */
-  h2 {
     font-size: 1.25rem !important;
-  }
-
-  h3 {
-    font-size: 1.1rem !important;
   }
 }
 
-/* Very small phones (< 480px) */
 @media (max-width: 480px) {
   main {
-    padding: 0.5rem !important;
+    padding: 0.4rem !important;
   }
 
-  /* Bonus points: 1 per row on tiny screens */
   .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-7 > div {
     flex: 1 1 100% !important;
   }
 
   nav h1 {
-    font-size: 1.25rem !important;
+    font-size: 1.1rem !important;
   }
 
   button {
-    font-size: 0.9rem !important;
-    padding: 0.5rem 1rem !important;
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.75rem !important;
   }
 }
 
 /* ==================== CENTERING & ALIGNMENT FIXES ==================== */
 
-/* Ensure content is centered but text is left-aligned */
 .max-w-7xl {
   margin-left: auto !important;
   margin-right: auto !important;
   text-align: left !important;
 }
 
-/* Fix any right-pushing issues */
 .bg-white.rounded-xl,
 .border-2,
 div[class*="col-span"] {
@@ -280,29 +324,11 @@ div[class*="col-span"] {
   margin-left: 0 !important;
 }
 
-/* Cards should have proper alignment */
-.p-6, .p-4, .p-3 {
-  display: block !important;
-  text-align: left !important;
-}
+/* ==================== CONDENSED GAPS ==================== */
 
-/* ==================== BETTER SPACING ==================== */
-
-.space-y-6 > * + * {
-  margin-top: 1.5rem !important;
-}
-
-.gap-3 {
-  gap: 0.75rem !important;
-}
-
-.gap-4 {
-  gap: 1rem !important;
-}
-
-.gap-6 {
-  gap: 1.5rem !important;
-}
+.gap-3 { gap: 0.5rem !important; }
+.gap-4 { gap: 0.75rem !important; }
+.gap-6 { gap: 1rem !important; }
 
 /* ==================== SMOOTH SCROLLING ==================== */
 
@@ -310,10 +336,9 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Better scrollbars */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
