@@ -25,6 +25,7 @@ const PASSWORDS = {
 const TEAM_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 const STORAGE_KEY = 'team_scoring_data';
 
+// Local fallback for offline/initial load
 const loadFromStorage = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -50,28 +51,63 @@ const loadFromStorage = () => {
       };
     }
   } catch (error) {
-    console.log('No existing data found, starting fresh');
+    console.log('No existing local data found');
   }
   
-  return {
-    players: SEED_PLAYERS,
-    weeklySession: {
-      isLocked: false,
-      teams: [],
-      fixtures: [],
-      teamScores: [],
-      timestamp: Date.now(),
-      weekNumber: 1
-    },
-    weekCounter: 1
-  };
+  return null;
 };
+
+const getDefaultState = () => ({
+  players: SEED_PLAYERS,
+  weeklySession: {
+    isLocked: false,
+    teams: [],
+    fixtures: [],
+    teamScores: [],
+    timestamp: Date.now(),
+    weekNumber: 1
+  },
+  weekCounter: 1
+});
 
 const saveToStorage = (state) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (error) {
-    console.error('Failed to save data:', error);
+    console.error('Failed to save local data:', error);
+  }
+};
+
+// Remote state functions
+const fetchRemoteState = async () => {
+  try {
+    const res = await fetch('/api/get-state');
+    const data = await res.json();
+    if (data.state) {
+      // Migrate remote state
+      const migratedPlayers = (data.state.players || []).map((p) => ({
+        ...p,
+        absenceCount: p.absenceCount || 0,
+        weeklyHistory: p.weeklyHistory || []
+      }));
+      return { ...data.state, players: migratedPlayers };
+    }
+    return null;
+  } catch (err) {
+    console.log('Could not fetch remote state:', err);
+    return null;
+  }
+};
+
+const saveRemoteState = async (state) => {
+  try {
+    await fetch('/api/save-state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state }),
+    });
+  } catch (err) {
+    console.error('Failed to save remote state:', err);
   }
 };
 
@@ -1924,22 +1960,74 @@ function App() {
   const [view, setView] = useState('admin');
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('');
 
   useEffect(() => {
     document.title = 'Weekly Team Scorer';
   }, []);
 
+  // Initial load: try remote first, fall back to local, then defaults
   useEffect(() => {
-    const state = loadFromStorage();
-    setAppState(state);
-    setIsLoading(false);
+    const loadState = async () => {
+      const remote = await fetchRemoteState();
+      if (remote) {
+        setAppState(remote);
+        saveToStorage(remote); // sync local
+      } else {
+        const local = loadFromStorage();
+        if (local) {
+          setAppState(local);
+          // Push local to remote so it syncs
+          saveRemoteState(local);
+        } else {
+          const defaults = getDefaultState();
+          setAppState(defaults);
+          saveRemoteState(defaults);
+        }
+      }
+      setIsLoading(false);
+    };
+    loadState();
   }, []);
 
+  // Save to both local and remote whenever state changes
   useEffect(() => {
     if (appState) {
       saveToStorage(appState);
+      // Only admin saves to remote to avoid conflicts
+      if (role === 'admin') {
+        saveRemoteState(appState);
+      }
     }
-  }, [appState]);
+  }, [appState, role]);
+
+  // Polling: user view refreshes from remote every 5 seconds
+  useEffect(() => {
+    if (role !== 'user') return;
+
+    const interval = setInterval(async () => {
+      const remote = await fetchRemoteState();
+      if (remote) {
+        setAppState(remote);
+        saveToStorage(remote);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [role]);
+
+  // Admin: manual sync button handler
+  const handleSyncNow = async () => {
+    setSyncStatus('syncing');
+    try {
+      await saveRemoteState(appState);
+      setSyncStatus('saved');
+      setTimeout(() => setSyncStatus(''), 2000);
+    } catch {
+      setSyncStatus('error');
+      setTimeout(() => setSyncStatus(''), 3000);
+    }
+  };
 
   const handleLogout = () => {
     setRole(null);
@@ -2007,6 +2095,24 @@ function App() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
+
+      {/* Sync indicator */}
+      <div className="fixed top-4 right-4 z-30 flex items-center gap-2">
+        {role === 'user' && (
+          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+            ● Live sync
+          </span>
+        )}
+        {role === 'admin' && (
+          <button
+            onClick={handleSyncNow}
+            className="text-xs bg-white text-gray-700 px-3 py-1 rounded-full shadow hover:bg-gray-50 flex items-center gap-1"
+          >
+            <RefreshCw size={12} className={syncStatus === 'syncing' ? 'animate-spin' : ''} />
+            {syncStatus === 'syncing' ? 'Syncing...' : syncStatus === 'saved' ? 'Synced ✓' : syncStatus === 'error' ? 'Sync failed' : 'Sync'}
+          </button>
+        )}
+      </div>
 
       <Sidebar
         isOpen={sidebarOpen}
