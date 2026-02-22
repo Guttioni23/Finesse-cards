@@ -807,48 +807,47 @@ const FullscreenScorecard = ({ teams, teamScores, weekNumber, onClose }) => {
       {/* Close button */}
       <button
         onClick={onClose}
-        className="fixed top-4 right-4 z-50 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-lg transition"
+        className="fixed top-3 right-3 z-50 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-1.5 rounded-lg transition"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
 
       {/* Header */}
-      <div className="text-center pt-6 pb-4">
-        <h1 className="text-3xl font-bold text-white">Week {weekNumber} Scorecard</h1>
-        <p className="text-indigo-300 text-sm mt-1">{teams.length} Teams • {numRounds} Rounds</p>
+      <div className="text-center pt-3 pb-2">
+        <h1 className="text-xl font-bold text-white">Week {weekNumber} Scorecard</h1>
+        <p className="text-indigo-300 text-xs">{teams.length} Teams • {numRounds} Rounds</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 px-6 pb-8 max-w-[1600px] mx-auto">
-        {/* LEFT: Team Rosters */}
-        <div className="lg:w-1/3 space-y-3">
-          <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
-            <span className="text-2xl">👥</span> Team Rosters
+      <div className="flex flex-col lg:flex-row gap-3 px-4 pb-4 max-w-[1400px] mx-auto" style={{ height: 'calc(100vh - 70px)' }}>
+        {/* LEFT: Team Rosters - compact grid */}
+        <div className="lg:w-[30%] flex flex-col min-h-0">
+          <h2 className="text-sm font-bold text-white mb-2 flex items-center gap-1">
+            <span>👥</span> Team Rosters
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5 overflow-y-auto flex-1">
             {(teams || []).map(team => {
               const score = (teamScores || []).find(ts => ts.teamNumber === team.teamNumber);
               return (
-                <div key={team.teamNumber} className="bg-white bg-opacity-10 backdrop-blur rounded-xl p-4 border border-white border-opacity-20">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-lg text-indigo-300">
+                <div key={team.teamNumber} className="bg-white bg-opacity-10 rounded-lg px-3 py-1.5 border border-white border-opacity-10">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <h3 className="font-bold text-sm text-indigo-300">
                       Team {team.teamLetter}
                     </h3>
                     {score && (
-                      <span className="text-xs bg-indigo-500 bg-opacity-50 text-white px-2 py-1 rounded-full font-semibold">
+                      <span className="text-[10px] bg-indigo-500 bg-opacity-50 text-white px-1.5 py-0.5 rounded-full font-semibold">
                         {score.teamTotalPoints} pts
                       </span>
                     )}
                   </div>
-                  <ul className="space-y-1">
+                  <div className="flex flex-wrap gap-x-3 gap-y-0">
                     {(team.players || []).map(player => (
-                      <li key={player.id} className="text-white text-sm flex items-center gap-2">
-                        <span className="text-indigo-400">•</span>
+                      <span key={player.id} className="text-white text-xs leading-tight">
                         {player.name}
-                      </li>
+                      </span>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               );
             })}
@@ -856,23 +855,23 @@ const FullscreenScorecard = ({ teams, teamScores, weekNumber, onClose }) => {
         </div>
 
         {/* RIGHT: Scorecard Table */}
-        <div className="lg:w-2/3">
-          <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
-            <span className="text-2xl">📊</span> Scores & Points
+        <div className="lg:w-[70%] flex flex-col min-h-0">
+          <h2 className="text-sm font-bold text-white mb-2 flex items-center gap-1">
+            <span>📊</span> Scores & Points
           </h2>
-          <div className="bg-white bg-opacity-10 backdrop-blur rounded-xl border border-white border-opacity-20 overflow-hidden">
+          <div className="bg-white bg-opacity-10 rounded-xl border border-white border-opacity-20 overflow-hidden flex-1">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="bg-white bg-opacity-10">
-                    <th className="px-4 py-3 text-left text-sm font-bold text-indigo-300 border-b border-white border-opacity-10">Team</th>
+                    <th className="px-3 py-2 text-left text-xs font-bold text-indigo-300 border-b border-white border-opacity-10">Team</th>
                     {Array.from({ length: numRounds }).map((_, idx) => (
-                      <th key={idx} className="px-4 py-3 text-center text-sm font-bold text-indigo-300 border-b border-white border-opacity-10">R{idx + 1}</th>
+                      <th key={idx} className="px-3 py-2 text-center text-xs font-bold text-indigo-300 border-b border-white border-opacity-10">R{idx + 1}</th>
                     ))}
-                    <th className="px-4 py-3 text-center text-sm font-bold text-yellow-300 border-b border-white border-opacity-10">Total</th>
-                    <th className="px-4 py-3 text-center text-sm font-bold text-blue-300 border-b border-white border-opacity-10">Rank</th>
-                    <th className="px-4 py-3 text-center text-sm font-bold text-green-300 border-b border-white border-opacity-10">Bonus</th>
-                    <th className="px-4 py-3 text-center text-sm font-bold text-purple-300 border-b border-white border-opacity-10">Points</th>
+                    <th className="px-3 py-2 text-center text-xs font-bold text-yellow-300 border-b border-white border-opacity-10">Total</th>
+                    <th className="px-3 py-2 text-center text-xs font-bold text-blue-300 border-b border-white border-opacity-10">Rank</th>
+                    <th className="px-3 py-2 text-center text-xs font-bold text-green-300 border-b border-white border-opacity-10">Bonus</th>
+                    <th className="px-3 py-2 text-center text-xs font-bold text-purple-300 border-b border-white border-opacity-10">Points</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -885,25 +884,25 @@ const FullscreenScorecard = ({ teams, teamScores, weekNumber, onClose }) => {
                         idx === 2 ? 'bg-orange-400 bg-opacity-5' : ''
                       }`}
                     >
-                      <td className="px-4 py-3 font-bold text-white text-lg">
+                      <td className="px-3 py-2 font-bold text-white text-sm">
                         {idx === 0 && '🥇 '}{idx === 1 && '🥈 '}{idx === 2 && '🥉 '}
                         Team {ts.teamLetter}
                       </td>
                       {(ts.roundScores || []).map((score, rIdx) => (
-                        <td key={rIdx} className="px-4 py-3 text-center text-white">
+                        <td key={rIdx} className="px-3 py-2 text-center text-white text-sm">
                           {score || 0}
                         </td>
                       ))}
-                      <td className="px-4 py-3 text-center font-bold text-yellow-300 text-lg">
+                      <td className="px-3 py-2 text-center font-bold text-yellow-300">
                         {ts.totalScore}
                       </td>
-                      <td className="px-4 py-3 text-center font-bold text-blue-300">
+                      <td className="px-3 py-2 text-center font-bold text-blue-300 text-sm">
                         {ts.rankPoints}
                       </td>
-                      <td className="px-4 py-3 text-center font-bold text-green-300">
+                      <td className="px-3 py-2 text-center font-bold text-green-300 text-sm">
                         {ts.bonusPoints}
                       </td>
-                      <td className="px-4 py-3 text-center font-bold text-purple-300 text-lg">
+                      <td className="px-3 py-2 text-center font-bold text-purple-300">
                         {ts.teamTotalPoints}
                       </td>
                     </tr>
@@ -914,8 +913,8 @@ const FullscreenScorecard = ({ teams, teamScores, weekNumber, onClose }) => {
           </div>
 
           {/* Points legend */}
-          <div className="mt-4 bg-white bg-opacity-5 rounded-lg p-3 border border-white border-opacity-10">
-            <div className="flex flex-wrap gap-4 text-xs text-gray-400 justify-center">
+          <div className="mt-2 bg-white bg-opacity-5 rounded-lg p-2 border border-white border-opacity-10">
+            <div className="flex flex-wrap gap-3 text-[10px] text-gray-400 justify-center">
               <span><strong className="text-blue-300">Rank:</strong> 1st=6, 2nd=5, 3rd=4, 4th=3, 5th=2, 6th=1</span>
               <span><strong className="text-green-300">Bonus:</strong> Based on Total Score</span>
               <span><strong className="text-purple-300">Points:</strong> Rank + Bonus</span>
