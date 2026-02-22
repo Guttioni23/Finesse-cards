@@ -20,15 +20,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No state provided' });
     }
 
-    const payload = typeof state === 'string' ? state : JSON.stringify(state);
-
     const response = await fetch(`${kvUrl}/set/app_state`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${kvToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(state),
     });
 
     const data = await response.json();
