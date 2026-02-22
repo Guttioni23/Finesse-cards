@@ -1969,100 +1969,64 @@ const Sidebar = ({ isOpen, onClose, role, view, setView, handleLogout }) => {
 
 function App() {
   const [role, setRole] = useState(null);
-  const [appState, setAppStateRaw] = useState(null);
+  const [appState, setAppStateLocal] = useState(null);
   const [view, setView] = useState('admin');
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [syncStatus, setSyncStatus] = useState('');
-  const roleRef = React.useRef(null);
-
-  // Keep roleRef in sync
-  useEffect(() => {
-    roleRef.current = role;
-  }, [role]);
-
-  // Wrapped setAppState: admin always saves to remote immediately
-  const setAppState = React.useCallback((newState) => {
-    setAppStateRaw(newState);
-    saveToStorage(newState);
-    if (roleRef.current === 'admin' && newState) {
-      saveRemoteState(newState);
-    }
-  }, []);
-
-  // Fetch latest from remote and apply it
-  const refreshFromRemote = React.useCallback(async () => {
-    try {
-      const remote = await fetchRemoteState();
-      if (remote && remote.players && remote.players.length > 0) {
-        setAppStateRaw(remote);
-        saveToStorage(remote);
-        return true;
-      }
-    } catch (err) {
-      console.log('Remote fetch failed:', err);
-    }
-    return false;
-  }, []);
 
   useEffect(() => {
     document.title = 'Weekly Team Scorer';
   }, []);
 
-  // Initial load: ALWAYS fetch remote
+  // Simple wrapper: any state change saves to remote immediately
+  const setAppState = (newState) => {
+    setAppStateLocal(newState);
+    if (newState) {
+      saveRemoteState(newState);
+    }
+  };
+
+  // On first load, get state from remote
   useEffect(() => {
-    const loadState = async () => {
-      const loaded = await refreshFromRemote();
-      if (!loaded) {
-        const local = loadFromStorage();
-        if (local && local.players && local.players.length > 0) {
-          setAppStateRaw(local);
-        } else {
-          const defaults = getDefaultState();
-          setAppStateRaw(defaults);
-          saveToStorage(defaults);
-          saveRemoteState(defaults);
-        }
+    const load = async () => {
+      const remote = await fetchRemoteState();
+      if (remote && remote.players && remote.players.length > 0) {
+        setAppStateLocal(remote);
+      } else {
+        // First ever load — seed with defaults and push to remote
+        const defaults = getDefaultState();
+        setAppStateLocal(defaults);
+        saveRemoteState(defaults);
       }
       setIsLoading(false);
     };
-    loadState();
-  }, [refreshFromRemote]);
+    load();
+  }, []);
 
-  // ALL devices: refresh from remote when page becomes visible
+  // Poll remote every 2 seconds — ALL devices, ALL the time
   useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        refreshFromRemote();
+    if (!role) return;
+
+    const poll = async () => {
+      const remote = await fetchRemoteState();
+      if (remote && remote.players && remote.players.length > 0) {
+        setAppStateLocal(remote);
       }
     };
-    document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('focus', refreshFromRemote);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('focus', refreshFromRemote);
+
+    const interval = setInterval(poll, 2000);
+    
+    // Also refresh when tab becomes visible
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') poll();
     };
-  }, [refreshFromRemote]);
+    document.addEventListener('visibilitychange', onVisible);
 
-  // User: also poll every 3 seconds as backup
-  useEffect(() => {
-    if (role !== 'user') return;
-    const interval = setInterval(refreshFromRemote, 3000);
-    return () => clearInterval(interval);
-  }, [role, refreshFromRemote]);
-
-  // Admin: manual sync button
-  const handleSyncNow = async () => {
-    setSyncStatus('syncing');
-    try {
-      await saveRemoteState(appState);
-      setSyncStatus('saved');
-      setTimeout(() => setSyncStatus(''), 2000);
-    } catch {
-      setSyncStatus('error');
-      setTimeout(() => setSyncStatus(''), 3000);
-    }
-  };
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [role]);
 
   const handleLogout = () => {
     setRole(null);
@@ -2130,24 +2094,6 @@ function App() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-
-      {/* Sync indicator */}
-      <div className="fixed top-4 right-4 z-30 flex items-center gap-2">
-        {role === 'user' && (
-          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-            ● Live sync
-          </span>
-        )}
-        {role === 'admin' && (
-          <button
-            onClick={handleSyncNow}
-            className="text-xs bg-white text-gray-700 px-3 py-1 rounded-full shadow hover:bg-gray-50 flex items-center gap-1"
-          >
-            <RefreshCw size={12} className={syncStatus === 'syncing' ? 'animate-spin' : ''} />
-            {syncStatus === 'syncing' ? 'Syncing...' : syncStatus === 'saved' ? 'Synced ✓' : syncStatus === 'error' ? 'Sync failed' : 'Sync'}
-          </button>
-        )}
-      </div>
 
       <Sidebar
         isOpen={sidebarOpen}
