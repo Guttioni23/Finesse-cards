@@ -24,8 +24,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ state: null });
     }
 
-    // Vercel KV returns the value as a string in data.result
-    const state = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+    // Vercel KV may return a string or an object depending on how it was stored
+    let state = data.result;
+    // Unwrap if double-stringified
+    while (typeof state === 'string') {
+      try {
+        state = JSON.parse(state);
+      } catch {
+        break;
+      }
+    }
     return res.status(200).json({ state });
   } catch (err) {
     console.error('GET state error:', err);
