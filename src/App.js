@@ -1969,103 +1969,89 @@ const Sidebar = ({ isOpen, onClose, role, view, setView, handleLogout }) => {
 
 function App() {
   const [role, setRole] = useState(null);
-  const [appState, setAppState] = useState(null);
+  const [appState, setAppStateRaw] = useState(null);
   const [view, setView] = useState('admin');
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState('');
+  const roleRef = React.useRef(null);
+
+  // Keep roleRef in sync
+  useEffect(() => {
+    roleRef.current = role;
+  }, [role]);
+
+  // Wrapped setAppState: admin always saves to remote immediately
+  const setAppState = React.useCallback((newState) => {
+    setAppStateRaw(newState);
+    saveToStorage(newState);
+    if (roleRef.current === 'admin' && newState) {
+      saveRemoteState(newState);
+    }
+  }, []);
+
+  // Fetch latest from remote and apply it
+  const refreshFromRemote = React.useCallback(async () => {
+    try {
+      const remote = await fetchRemoteState();
+      if (remote && remote.players && remote.players.length > 0) {
+        setAppStateRaw(remote);
+        saveToStorage(remote);
+        return true;
+      }
+    } catch (err) {
+      console.log('Remote fetch failed:', err);
+    }
+    return false;
+  }, []);
 
   useEffect(() => {
     document.title = 'Weekly Team Scorer';
   }, []);
 
-  // Initial load: ALWAYS wait for remote first
+  // Initial load: ALWAYS fetch remote
   useEffect(() => {
     const loadState = async () => {
-      // Try remote first — it's the single source of truth
-      try {
-        const remote = await fetchRemoteState();
-        if (remote && remote.players && remote.players.length > 0) {
-          setAppState(remote);
-          saveToStorage(remote);
-          setIsLoading(false);
-          return;
+      const loaded = await refreshFromRemote();
+      if (!loaded) {
+        const local = loadFromStorage();
+        if (local && local.players && local.players.length > 0) {
+          setAppStateRaw(local);
+        } else {
+          const defaults = getDefaultState();
+          setAppStateRaw(defaults);
+          saveToStorage(defaults);
+          saveRemoteState(defaults);
         }
-      } catch (err) {
-        console.log('Remote load failed:', err);
-      }
-
-      // Only use local if remote completely fails
-      const local = loadFromStorage();
-      if (local && local.players && local.players.length > 0) {
-        setAppState(local);
-      } else {
-        const defaults = getDefaultState();
-        setAppState(defaults);
-        saveToStorage(defaults);
       }
       setIsLoading(false);
     };
     loadState();
-  }, []);
+  }, [refreshFromRemote]);
 
-  // Save to both local and remote whenever state changes (admin only saves remote)
-  const isSaving = React.useRef(false);
-  
+  // ALL devices: refresh from remote when page becomes visible
   useEffect(() => {
-    if (!appState) return;
-    
-    saveToStorage(appState);
-    
-    if (role === 'admin') {
-      // Save to remote immediately
-      isSaving.current = true;
-      saveRemoteState(appState).finally(() => {
-        isSaving.current = false;
-      });
-    }
-  }, [appState, role]);
-
-  // Polling: ONLY user devices poll from remote
-  useEffect(() => {
-    if (role !== 'user') return;
-
-    // Poll every 3 seconds
-    const interval = setInterval(async () => {
-      try {
-        const remote = await fetchRemoteState();
-        if (remote && remote.players && remote.players.length > 0) {
-          setAppState(remote);
-          saveToStorage(remote);
-        }
-      } catch (err) {
-        console.log('Polling failed:', err);
-      }
-    }, 3000);
-
-    // Also refresh immediately when tab/app becomes visible again
-    const handleVisibility = async () => {
+    const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
-        try {
-          const remote = await fetchRemoteState();
-          if (remote && remote.players && remote.players.length > 0) {
-            setAppState(remote);
-            saveToStorage(remote);
-          }
-        } catch (err) {
-          console.log('Visibility refresh failed:', err);
-        }
+        refreshFromRemote();
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
-
+    window.addEventListener('focus', refreshFromRemote);
     return () => {
-      clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', refreshFromRemote);
     };
-  }, [role]);
+  }, [refreshFromRemote]);
 
-  // Admin: manual sync button handler
+  // User: also poll every 3 seconds as backup
+  useEffect(() => {
+    if (role !== 'user') return;
+    const interval = setInterval(refreshFromRemote, 3000);
+    return () => clearInterval(interval);
+  }, [role, refreshFromRemote]);
+
+  // Admin: manual sync button
   const handleSyncNow = async () => {
     setSyncStatus('syncing');
     try {
