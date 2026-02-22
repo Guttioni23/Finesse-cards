@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Trophy, Users, UserCheck, UserX, Plus, Shuffle, Save, LogOut, RefreshCw, ChevronLeft, Calendar, Award, TrendingUp, Mail, RotateCcw } from 'lucide-react';
 
@@ -1981,6 +1980,10 @@ function App() {
   // Initial load: try remote first, fall back to local, then defaults
   useEffect(() => {
     const loadState = async () => {
+      // Load local immediately so the screen isn't blank
+      const local = loadFromStorage();
+      
+      // Always try remote — it's the source of truth
       try {
         const remote = await fetchRemoteState();
         if (remote && remote.players && remote.players.length > 0) {
@@ -1990,10 +1993,10 @@ function App() {
           return;
         }
       } catch (err) {
-        console.log('Remote load failed, trying local:', err);
+        console.log('Remote load failed, using local:', err);
       }
 
-      const local = loadFromStorage();
+      // Remote failed or empty — use local or defaults
       if (local && local.players && local.players.length > 0) {
         setAppState(local);
         saveRemoteState(local);
@@ -2008,22 +2011,32 @@ function App() {
     loadState();
   }, []);
 
-  // Save to both local and remote whenever state changes
+  // Save to both local and remote whenever state changes (admin only saves remote)
+  const skipNextPoll = React.useRef(false);
+  
   useEffect(() => {
     if (appState) {
       saveToStorage(appState);
-      // Only admin saves to remote to avoid conflicts
       if (role === 'admin') {
+        skipNextPoll.current = true;
         saveRemoteState(appState);
       }
     }
   }, [appState, role]);
 
-  // Polling: user view refreshes from remote every 5 seconds
+  // Polling: all devices refresh from remote periodically
   useEffect(() => {
-    if (role !== 'user') return;
+    if (!role) return;
+
+    const pollInterval = role === 'user' ? 5000 : 10000;
 
     const interval = setInterval(async () => {
+      // Admin skips the next poll right after saving to avoid overwriting own changes
+      if (role === 'admin' && skipNextPoll.current) {
+        skipNextPoll.current = false;
+        return;
+      }
+      
       try {
         const remote = await fetchRemoteState();
         if (remote && remote.players && remote.players.length > 0) {
@@ -2033,7 +2046,7 @@ function App() {
       } catch (err) {
         console.log('Polling failed:', err);
       }
-    }, 5000);
+    }, pollInterval);
 
     return () => clearInterval(interval);
   }, [role]);
