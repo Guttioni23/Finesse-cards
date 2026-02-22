@@ -1979,13 +1979,10 @@ function App() {
     document.title = 'Weekly Team Scorer';
   }, []);
 
-  // Initial load: try remote first, fall back to local, then defaults
+  // Initial load: ALWAYS wait for remote first
   useEffect(() => {
     const loadState = async () => {
-      // Load local immediately so the screen isn't blank
-      const local = loadFromStorage();
-      
-      // Always try remote — it's the source of truth
+      // Try remote first — it's the single source of truth
       try {
         const remote = await fetchRemoteState();
         if (remote && remote.players && remote.players.length > 0) {
@@ -1995,17 +1992,16 @@ function App() {
           return;
         }
       } catch (err) {
-        console.log('Remote load failed, using local:', err);
+        console.log('Remote load failed:', err);
       }
 
-      // Remote failed or empty — use local or defaults
+      // Only use local if remote completely fails
+      const local = loadFromStorage();
       if (local && local.players && local.players.length > 0) {
         setAppState(local);
-        saveRemoteState(local);
       } else {
         const defaults = getDefaultState();
         setAppState(defaults);
-        saveRemoteState(defaults);
         saveToStorage(defaults);
       }
       setIsLoading(false);
@@ -2034,6 +2030,7 @@ function App() {
   useEffect(() => {
     if (role !== 'user') return;
 
+    // Poll every 3 seconds
     const interval = setInterval(async () => {
       try {
         const remote = await fetchRemoteState();
@@ -2044,9 +2041,28 @@ function App() {
       } catch (err) {
         console.log('Polling failed:', err);
       }
-    }, 5000);
+    }, 3000);
 
-    return () => clearInterval(interval);
+    // Also refresh immediately when tab/app becomes visible again
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          const remote = await fetchRemoteState();
+          if (remote && remote.players && remote.players.length > 0) {
+            setAppState(remote);
+            saveToStorage(remote);
+          }
+        } catch (err) {
+          console.log('Visibility refresh failed:', err);
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [role]);
 
   // Admin: manual sync button handler
