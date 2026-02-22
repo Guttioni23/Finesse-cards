@@ -796,6 +796,137 @@ const Scoreboard = ({ teams, fixtures, teamScores, onFixtureChange, onBonusChang
   );
 };
 
+const FullscreenScorecard = ({ teams, teamScores, weekNumber, onClose }) => {
+  const numRounds = teamScores[0]?.roundScores?.length || 0;
+
+  // Sort teams by totalScore descending for display
+  const sortedScores = [...(teamScores || [])].sort((a, b) => b.totalScore - a.totalScore);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 to-indigo-900 overflow-auto">
+      {/* Close button */}
+      <button
+        onClick={onClose}
+        className="fixed top-4 right-4 z-50 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-lg transition"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Header */}
+      <div className="text-center pt-6 pb-4">
+        <h1 className="text-3xl font-bold text-white">Week {weekNumber} Scorecard</h1>
+        <p className="text-indigo-300 text-sm mt-1">{teams.length} Teams • {numRounds} Rounds</p>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6 px-6 pb-8 max-w-[1600px] mx-auto">
+        {/* LEFT: Team Rosters */}
+        <div className="lg:w-1/3 space-y-3">
+          <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+            <span className="text-2xl">👥</span> Team Rosters
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+            {(teams || []).map(team => {
+              const score = (teamScores || []).find(ts => ts.teamNumber === team.teamNumber);
+              return (
+                <div key={team.teamNumber} className="bg-white bg-opacity-10 backdrop-blur rounded-xl p-4 border border-white border-opacity-20">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-bold text-lg text-indigo-300">
+                      Team {team.teamLetter}
+                    </h3>
+                    {score && (
+                      <span className="text-xs bg-indigo-500 bg-opacity-50 text-white px-2 py-1 rounded-full font-semibold">
+                        {score.teamTotalPoints} pts
+                      </span>
+                    )}
+                  </div>
+                  <ul className="space-y-1">
+                    {(team.players || []).map(player => (
+                      <li key={player.id} className="text-white text-sm flex items-center gap-2">
+                        <span className="text-indigo-400">•</span>
+                        {player.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT: Scorecard Table */}
+        <div className="lg:w-2/3">
+          <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+            <span className="text-2xl">📊</span> Scores & Points
+          </h2>
+          <div className="bg-white bg-opacity-10 backdrop-blur rounded-xl border border-white border-opacity-20 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-white bg-opacity-10">
+                    <th className="px-4 py-3 text-left text-sm font-bold text-indigo-300 border-b border-white border-opacity-10">Team</th>
+                    {Array.from({ length: numRounds }).map((_, idx) => (
+                      <th key={idx} className="px-4 py-3 text-center text-sm font-bold text-indigo-300 border-b border-white border-opacity-10">R{idx + 1}</th>
+                    ))}
+                    <th className="px-4 py-3 text-center text-sm font-bold text-yellow-300 border-b border-white border-opacity-10">Total</th>
+                    <th className="px-4 py-3 text-center text-sm font-bold text-blue-300 border-b border-white border-opacity-10">Rank</th>
+                    <th className="px-4 py-3 text-center text-sm font-bold text-green-300 border-b border-white border-opacity-10">Bonus</th>
+                    <th className="px-4 py-3 text-center text-sm font-bold text-purple-300 border-b border-white border-opacity-10">Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedScores.map((ts, idx) => (
+                    <tr 
+                      key={ts.teamNumber} 
+                      className={`border-b border-white border-opacity-5 ${
+                        idx === 0 ? 'bg-yellow-500 bg-opacity-10' : 
+                        idx === 1 ? 'bg-gray-300 bg-opacity-5' : 
+                        idx === 2 ? 'bg-orange-400 bg-opacity-5' : ''
+                      }`}
+                    >
+                      <td className="px-4 py-3 font-bold text-white text-lg">
+                        {idx === 0 && '🥇 '}{idx === 1 && '🥈 '}{idx === 2 && '🥉 '}
+                        Team {ts.teamLetter}
+                      </td>
+                      {(ts.roundScores || []).map((score, rIdx) => (
+                        <td key={rIdx} className="px-4 py-3 text-center text-white">
+                          {score || 0}
+                        </td>
+                      ))}
+                      <td className="px-4 py-3 text-center font-bold text-yellow-300 text-lg">
+                        {ts.totalScore}
+                      </td>
+                      <td className="px-4 py-3 text-center font-bold text-blue-300">
+                        {ts.rankPoints}
+                      </td>
+                      <td className="px-4 py-3 text-center font-bold text-green-300">
+                        {ts.bonusPoints}
+                      </td>
+                      <td className="px-4 py-3 text-center font-bold text-purple-300 text-lg">
+                        {ts.teamTotalPoints}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Points legend */}
+          <div className="mt-4 bg-white bg-opacity-5 rounded-lg p-3 border border-white border-opacity-10">
+            <div className="flex flex-wrap gap-4 text-xs text-gray-400 justify-center">
+              <span><strong className="text-blue-300">Rank:</strong> 1st=6, 2nd=5, 3rd=4, 4th=3, 5th=2, 6th=1</span>
+              <span><strong className="text-green-300">Bonus:</strong> Based on Total Score</span>
+              <span><strong className="text-purple-300">Points:</strong> Rank + Bonus</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const EMAIL_STORAGE_KEY = 'team_scoring_emails';
 
 const loadEmails = () => {
@@ -827,7 +958,7 @@ const AdminDashboard = ({ appState, onUpdate }) => {
   const [emailSending, setEmailSending] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [emailSuccess, setEmailSuccess] = useState('');
-
+  const [showFullscreen, setShowFullscreen] = useState(false);
   const { players, weeklySession, weekCounter } = appState;
   const presentCount = (players || []).filter(p => p.present).length;
   const awayCount = (players || []).filter(p => !p.present).length;
@@ -1650,6 +1781,13 @@ const AdminDashboard = ({ appState, onUpdate }) => {
           {weeklySession.teams && weeklySession.teams.length > 0 && (
             <>
               <button
+                onClick={() => setShowFullscreen(true)}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition flex items-center gap-2 font-semibold"
+              >
+                <TrendingUp size={20} />
+                Fullscreen Scorecard
+              </button>
+              <button
                 onClick={downloadSpreadsheet}
                 className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-2 font-semibold"
               >
@@ -1880,6 +2018,15 @@ const AdminDashboard = ({ appState, onUpdate }) => {
           </div>
         </div>
       )}
+
+      {showFullscreen && weeklySession.teams && weeklySession.teams.length > 0 && (
+        <FullscreenScorecard
+          teams={weeklySession.teams}
+          teamScores={weeklySession.teamScores}
+          weekNumber={weekCounter}
+          onClose={() => setShowFullscreen(false)}
+        />
+      )}
       
     </div>
   );
@@ -1973,6 +2120,7 @@ function App() {
   const [view, setView] = useState('admin');
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showFullscreenUser, setShowFullscreenUser] = useState(false);
 
   useEffect(() => {
     document.title = 'Weekly Team Scorer';
@@ -2184,7 +2332,25 @@ function App() {
                     <strong> Bonus Points:</strong> Based on Total Score • 
                     <strong> Points:</strong> Rank + Bonus
                   </div>
+                  <div className="mt-3 flex justify-center">
+                    <button
+                      onClick={() => setShowFullscreenUser(true)}
+                      className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition flex items-center gap-2 font-semibold"
+                    >
+                      <TrendingUp size={18} />
+                      Fullscreen Scorecard
+                    </button>
+                  </div>
                 </div>
+
+                {showFullscreenUser && (
+                  <FullscreenScorecard
+                    teams={appState.weeklySession.teams}
+                    teamScores={appState.weeklySession.teamScores}
+                    weekNumber={appState.weeklySession.weekNumber}
+                    onClose={() => setShowFullscreenUser(false)}
+                  />
+                )}
               </>
             ) : (
               <div className="bg-white rounded-xl shadow-lg p-6">
