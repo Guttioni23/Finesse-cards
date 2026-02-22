@@ -112,13 +112,15 @@ const fetchRemoteState = async () => {
 
 const saveRemoteState = async (state) => {
   try {
-    await fetch('/api/save-state', {
+    const res = await fetch('/api/save-state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ state }),
     });
+    return res.ok;
   } catch (err) {
     console.error('Failed to save remote state:', err);
+    return false;
   }
 };
 
@@ -2012,31 +2014,27 @@ function App() {
   }, []);
 
   // Save to both local and remote whenever state changes (admin only saves remote)
-  const skipNextPoll = React.useRef(false);
+  const isSaving = React.useRef(false);
   
   useEffect(() => {
-    if (appState) {
-      saveToStorage(appState);
-      if (role === 'admin') {
-        skipNextPoll.current = true;
-        saveRemoteState(appState);
-      }
+    if (!appState) return;
+    
+    saveToStorage(appState);
+    
+    if (role === 'admin') {
+      // Save to remote immediately
+      isSaving.current = true;
+      saveRemoteState(appState).finally(() => {
+        isSaving.current = false;
+      });
     }
   }, [appState, role]);
 
-  // Polling: all devices refresh from remote periodically
+  // Polling: ONLY user devices poll from remote
   useEffect(() => {
-    if (!role) return;
-
-    const pollInterval = role === 'user' ? 5000 : 10000;
+    if (role !== 'user') return;
 
     const interval = setInterval(async () => {
-      // Admin skips the next poll right after saving to avoid overwriting own changes
-      if (role === 'admin' && skipNextPoll.current) {
-        skipNextPoll.current = false;
-        return;
-      }
-      
       try {
         const remote = await fetchRemoteState();
         if (remote && remote.players && remote.players.length > 0) {
@@ -2046,7 +2044,7 @@ function App() {
       } catch (err) {
         console.log('Polling failed:', err);
       }
-    }, pollInterval);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [role]);
