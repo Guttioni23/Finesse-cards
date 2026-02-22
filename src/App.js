@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Trophy, Users, UserCheck, UserX, Plus, Shuffle, Save, LogOut, RefreshCw, ChevronLeft, Calendar, Award, TrendingUp, Mail, RotateCcw } from 'lucide-react';
 
@@ -90,7 +91,18 @@ const fetchRemoteState = async () => {
         absenceCount: p.absenceCount || 0,
         weeklyHistory: p.weeklyHistory || []
       }));
-      return { ...data.state, players: migratedPlayers };
+      return {
+        players: migratedPlayers,
+        weeklySession: {
+          isLocked: data.state.weeklySession?.isLocked || false,
+          teams: data.state.weeklySession?.teams || [],
+          fixtures: data.state.weeklySession?.fixtures || [],
+          teamScores: data.state.weeklySession?.teamScores || [],
+          timestamp: data.state.weeklySession?.timestamp || Date.now(),
+          weekNumber: data.state.weeklySession?.weekNumber || 1
+        },
+        weekCounter: data.state.weekCounter || 1
+      };
     }
     return null;
   } catch (err) {
@@ -1969,21 +1981,27 @@ function App() {
   // Initial load: try remote first, fall back to local, then defaults
   useEffect(() => {
     const loadState = async () => {
-      const remote = await fetchRemoteState();
-      if (remote) {
-        setAppState(remote);
-        saveToStorage(remote); // sync local
-      } else {
-        const local = loadFromStorage();
-        if (local) {
-          setAppState(local);
-          // Push local to remote so it syncs
-          saveRemoteState(local);
-        } else {
-          const defaults = getDefaultState();
-          setAppState(defaults);
-          saveRemoteState(defaults);
+      try {
+        const remote = await fetchRemoteState();
+        if (remote && remote.players && remote.players.length > 0) {
+          setAppState(remote);
+          saveToStorage(remote);
+          setIsLoading(false);
+          return;
         }
+      } catch (err) {
+        console.log('Remote load failed, trying local:', err);
+      }
+
+      const local = loadFromStorage();
+      if (local && local.players && local.players.length > 0) {
+        setAppState(local);
+        saveRemoteState(local);
+      } else {
+        const defaults = getDefaultState();
+        setAppState(defaults);
+        saveRemoteState(defaults);
+        saveToStorage(defaults);
       }
       setIsLoading(false);
     };
@@ -2006,10 +2024,14 @@ function App() {
     if (role !== 'user') return;
 
     const interval = setInterval(async () => {
-      const remote = await fetchRemoteState();
-      if (remote) {
-        setAppState(remote);
-        saveToStorage(remote);
+      try {
+        const remote = await fetchRemoteState();
+        if (remote && remote.players && remote.players.length > 0) {
+          setAppState(remote);
+          saveToStorage(remote);
+        }
+      } catch (err) {
+        console.log('Polling failed:', err);
       }
     }, 5000);
 
