@@ -253,12 +253,6 @@ const LoginPage = ({ onLogin }) => {
             Login
           </button>
         </div>
-        
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
-          <p className="font-semibold mb-2">Demo Passwords:</p>
-          <p>Admin: <code className="bg-gray-200 px-2 py-1 rounded">admin123</code></p>
-          <p>User: <code className="bg-gray-200 px-2 py-1 rounded">user123</code></p>
-        </div>
       </div>
     </div>
   );
@@ -1074,12 +1068,6 @@ const AdminDashboard = ({ appState, onUpdate }) => {
   const togglePresence = (playerId) => {
     const player = (players || []).find(p => p.id === playerId);
     
-    if (player && player.present && (player.absenceCount || 0) >= 15) {
-      setError(`${player.name} has reached the maximum of 15 absences and cannot be marked as away.`);
-      setTimeout(() => setError(''), 5000);
-      return;
-    }
-    
     const updated = (players || []).map(p =>
       p.id === playerId ? { ...p, present: !p.present } : p
     );
@@ -1380,16 +1368,18 @@ const AdminDashboard = ({ appState, onUpdate }) => {
           }
         }
       } else {
+        const absences = player.absenceCount || 0;
+        const pointsEarned = absences >= 15 ? 0 : 3;
         const historyRecord = {
           weekNumber: weeklySession.weekNumber,
           date: weeklySession.timestamp,
           isPresent: false,
-          pointsEarned: 3
+          pointsEarned
         };
         return {
           ...player,
-          totalPoints: player.totalPoints + 3,
-          absenceCount: (player.absenceCount || 0) + 1,
+          totalPoints: player.totalPoints + pointsEarned,
+          absenceCount: absences + 1,
           weeklyHistory: [...(player.weeklyHistory || []), historyRecord]
         };
       }
@@ -1510,7 +1500,7 @@ const AdminDashboard = ({ appState, onUpdate }) => {
         <div className="bg-orange-50 border border-orange-300 text-orange-800 px-4 py-3 rounded-lg flex items-center gap-2">
           <span className="text-xl">⚠️</span>
           <span>
-            <strong>{maxAbsencesCount} player{maxAbsencesCount > 1 ? 's have' : ' has'}</strong> reached the maximum of 15 absences and cannot be marked as away.
+            <strong>{maxAbsencesCount} player{maxAbsencesCount > 1 ? 's have' : ' has'}</strong> reached 15+ absences and will no longer receive compensation points when away.
           </span>
         </div>
       )}
@@ -1556,7 +1546,7 @@ const AdminDashboard = ({ appState, onUpdate }) => {
         <p className="text-xs text-gray-600 mb-3">
           Absence indicators: <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded">0-11</span> Normal • 
           <span className="bg-orange-500 text-white px-2 py-0.5 rounded ml-1">12-14</span> Warning • 
-          <span className="bg-red-600 text-white px-2 py-0.5 rounded ml-1">15</span> Max (cannot mark away)
+          <span className="bg-red-600 text-white px-2 py-0.5 rounded ml-1">15+</span> No compensation pts
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto" style={{ maxHeight: '500px' }}>
@@ -1597,12 +1587,9 @@ const AdminDashboard = ({ appState, onUpdate }) => {
                   )}
                   <button
                     onClick={() => togglePresence(player.id)}
-                    disabled={player.present && isAtMax}
                     className={`px-3 py-1 rounded-full text-sm font-semibold transition ${
                       player.present
-                        ? isAtMax 
-                          ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-                          : 'bg-green-600 text-white hover:bg-green-700'
+                        ? 'bg-green-600 text-white hover:bg-green-700'
                         : 'bg-red-600 text-white hover:bg-red-700'
                     }`}
                   >
@@ -1814,7 +1801,7 @@ const AdminDashboard = ({ appState, onUpdate }) => {
 
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>Points System:</strong> Away players receive +3 only. Present players receive Team Total Points (Rank Points + Bonus Points).
+            <strong>Points System:</strong> Away players receive +3 (up to 15 absences, then +0). Present players receive Team Total Points (Rank Points + Bonus Points).
             <br />
             <strong>Rank Points:</strong> Fixed system - 1st place: 6 pts, 2nd: 5 pts, 3rd: 4 pts, 4th: 3 pts, 5th: 2 pts, 6th: 1 pt.
             <br />
@@ -1822,7 +1809,7 @@ const AdminDashboard = ({ appState, onUpdate }) => {
             <br />
             <strong>Bonus Points:</strong> Auto-calculated based on Total Score. Different thresholds for 5 teams vs 4/6 teams.
             <br />
-            <strong>Max Absences:</strong> Players can have a maximum of 15 absences. After 15, they cannot be marked as away.
+            <strong>Max Absences:</strong> After 15 absences, players can still be marked away but will no longer receive the +3 compensation points.
             <br />
             <strong>Manual Editing:</strong> Admins can click on any player's weekly scores or absences in the Leaderboard view to manually adjust them. Total points are automatically recalculated from weekly scores.
             <br />
