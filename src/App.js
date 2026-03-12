@@ -2154,9 +2154,10 @@ function App() {
     if (!role) return;
 
     const poll = async () => {
-      // Don't overwrite local state if the user edited within the last 2 seconds
       if (Date.now() - lastEditTimeRef.current < 2000) return;
       const remote = await fetchRemoteState();
+      // Check again — user may have typed while the fetch was in-flight
+      if (Date.now() - lastEditTimeRef.current < 2000) return;
       if (remote && remote.players && remote.players.length > 0) {
         setAppStateLocal(remote);
       }
