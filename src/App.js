@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Trophy, Users, UserCheck, UserX, Plus, Shuffle, Save, LogOut, RefreshCw, ChevronLeft, Calendar, Award, TrendingUp, Mail, RotateCcw } from 'lucide-react';
 
 // ==================== INITIAL DATA ====================
@@ -2108,17 +2108,29 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showFullscreenUser, setShowFullscreenUser] = useState(false);
 
+  const saveTimerRef = useRef(null);
+  const lastEditTimeRef = useRef(0);
+
   useEffect(() => {
     document.title = 'Weekly Team Scorer';
   }, []);
 
-  // Simple wrapper: any state change saves to remote immediately
-  const setAppState = (newState) => {
+  // Debounced remote save — waits 600ms after the last change before persisting
+  const debouncedSave = useCallback((newState) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      saveRemoteState(newState);
+    }, 600);
+  }, []);
+
+  // Wrapper: update local state immediately, debounce the remote save
+  const setAppState = useCallback((newState) => {
+    lastEditTimeRef.current = Date.now();
     setAppStateLocal(newState);
     if (newState) {
-      saveRemoteState(newState);
+      debouncedSave(newState);
     }
-  };
+  }, [debouncedSave]);
 
   // On first load, get state from remote
   useEffect(() => {
@@ -2142,6 +2154,8 @@ function App() {
     if (!role) return;
 
     const poll = async () => {
+      // Don't overwrite local state if the user edited within the last 2 seconds
+      if (Date.now() - lastEditTimeRef.current < 2000) return;
       const remote = await fetchRemoteState();
       if (remote && remote.players && remote.players.length > 0) {
         setAppStateLocal(remote);
